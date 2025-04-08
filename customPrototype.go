@@ -103,7 +103,7 @@ func main() {
 
 	// Project TODO: Automatically generate this rule from lamdba
 	drls := `
-    rule Check10000 "Check User Vibes" salience 10 {
+    rule Check10000 "Take Me Home, Country Roads" salience 10 {
         when
            UserSelections.IsSongThemeMatch("Adventure", "America", "Home", "Lessons")
         then
