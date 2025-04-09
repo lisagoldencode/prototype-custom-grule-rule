@@ -70,6 +70,9 @@ func (p *UserSelections) SetRecommendations(songId string, songThemes ...string)
 		if err != nil {
 			panic(err)
 		}
+		if err != nil {
+			panic(err)
+		}
 
 		if boolValue {
 			matchCount += 1
@@ -94,13 +97,14 @@ func main() {
 	userSelections := &UserSelections{
 		Adventure:          true,
 		America:            true,
+		America:            true,
 		CarsTrucksTractors: false,
 		Goodtimes:          false,
 		Grit:               false,
 		Home:               false,
 		Love:               false,
 		HeartBreak:         false,
-		Lessons:            false,
+		Lessons:            true,
 		Rebellion:          false,
 		Recommendations:    make(map[string]int),
 	}
