@@ -39,9 +39,9 @@ func (p *UserSelections) GetField(fieldName string) (bool, error) {
 	return false, fmt.Errorf("field %s is not a boolean", fieldName)
 }
 
-func (p *UserSelections) Append(songId string) () {
+func (p *UserSelections) Append(songId string) {
 	p.Recommendations = append(p.Recommendations, songId)
-} 
+}
 
 // Custom function to check if adventure and good times are true
 func (p *UserSelections) IsSongThemeMatch(songThemes ...string) bool {
@@ -53,7 +53,9 @@ func (p *UserSelections) IsSongThemeMatch(songThemes ...string) bool {
 	for _, theme := range songThemes {
 		boolValue, err := p.GetField(theme)
 
-		if err != nil { panic(err) }
+		if err != nil {
+			panic(err)
+		}
 
 		if boolValue {
 			fmt.Printf(theme + " --- Match found!")
@@ -61,6 +63,7 @@ func (p *UserSelections) IsSongThemeMatch(songThemes ...string) bool {
 		} else {
 			fmt.Printf(theme)
 		}
+	}
 
 	fmt.Printf("\nMatches: %d", matchCount)
 	if matchCount > 0 {
@@ -78,14 +81,14 @@ func main() {
 
 	userSelections := &UserSelections{
 		Adventure:          true,
-		America:            false,
+		America:            true,
 		CarsTrucksTractors: false,
 		Goodtimes:          true,
 		Grit:               false,
 		Home:               false,
 		Love:               true,
 		HeartBreak:         false,
-		Lessons:            false,
+		Lessons:            true,
 		Rebellion:          false,
 		Recommendations:    []string{},
 	}
@@ -100,6 +103,14 @@ func main() {
         then
             UserSelections.Append("10000");
             Retract("Check10000");
+    }
+
+	rule Check10001 "All My Ex’s Live In Texas" salience 10 {
+        when
+           UserSelections.IsSongThemeMatch("America", "HeartBreak", "Rebellion")
+        then
+            UserSelections.Append("10001");
+            Retract("Check10001");
     }
     `
 
@@ -119,7 +130,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 
 	fmt.Println("=======================================")
 	fmt.Println("Song recommendations for user: ")
