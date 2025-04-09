@@ -22,52 +22,67 @@ type UserSelections struct {
 	HeartBreak         bool
 	Lessons            bool
 	Rebellion          bool
-	Recommendations    []string
+	Recommendations    map[string]int
 }
 
 func (p *UserSelections) GetField(fieldName string) (bool, error) {
 	val := reflect.ValueOf(p).Elem()
 	field := val.FieldByName(fieldName)
 	if !field.IsValid() {
-		return false, fmt.Errorf("field %s does not exist", fieldName)
+		return false, fmt.Errorf("field '%s' does not exist", fieldName)
 	}
 
 	if field.Kind() == reflect.Bool {
 		return field.Bool(), nil
 	}
 
-	return false, fmt.Errorf("field %s is not a boolean", fieldName)
+	return false, fmt.Errorf("field '%s' is not a boolean", fieldName)
 }
 
-func (p *UserSelections) Append(songId string) () {
-	p.Recommendations = append(p.Recommendations, songId)
-} 
-
-// Custom function to check if adventure and good times are true
-func (p *UserSelections) IsSongThemeMatch(songThemes ...string) bool {
+func (p *UserSelections) IsSongThemeMatch(songId string, songThemes ...string) bool {
 	fmt.Println("=========")
-	fmt.Println("UserSelections")
-	fmt.Println(p)
+	fmt.Println("Checking Matches: " + songId)
+
+	for _, theme := range songThemes {
+		boolValue, err := p.GetField(theme)
+
+		if err != nil {
+			panic(err)
+		}
+		if boolValue {
+			fmt.Println("Match found!")
+			return true
+		}
+
+		fmt.Println("No Matches")
+	}
+	return false
+}
+
+func (p *UserSelections) SetRecommendations(songId string, songThemes ...string) int {
+	fmt.Println("------")
+	fmt.Println("Counting Matches... (" + songId + ")")
 
 	matchCount := 0
 	for _, theme := range songThemes {
 		boolValue, err := p.GetField(theme)
 
-		if err != nil { panic(err) }
-
-		if boolValue {
-			fmt.Printf(theme + " --- Match found!")
-			matchCount += 1
-		} else {
-			fmt.Printf(theme)
+		if err != nil {
+			panic(err)
 		}
 
-	fmt.Printf("\nMatches: %d", matchCount)
-	if matchCount > 0 {
-		return true
+		if boolValue {
+			matchCount += 1
+			fmt.Println(theme+" --- Match found -", matchCount)
+		} else {
+			fmt.Println(theme)
+		}
 	}
 
-	return false
+	fmt.Println("\nMatches for song '"+songId+"':", matchCount)
+
+	p.Recommendations[songId] = matchCount
+	return matchCount
 }
 
 func main() {
@@ -78,16 +93,16 @@ func main() {
 
 	userSelections := &UserSelections{
 		Adventure:          true,
-		America:            false,
+		America:            true,
 		CarsTrucksTractors: false,
-		Goodtimes:          true,
+		Goodtimes:          false,
 		Grit:               false,
 		Home:               false,
-		Love:               true,
+		Love:               false,
 		HeartBreak:         false,
 		Lessons:            false,
 		Rebellion:          false,
-		Recommendations:    []string{},
+		Recommendations:    make(map[string]int),
 	}
 
 	dataCtx.Add("UserSelections", userSelections)
@@ -96,10 +111,18 @@ func main() {
 	drls := `
     rule Check10000 "Take Me Home, Country Roads" salience 10 {
         when
-           UserSelections.IsSongThemeMatch("Adventure", "America", "Home", "Lessons")
+           UserSelections.IsSongThemeMatch("10000", "Adventure", "America", "Home", "Lessons")
         then
-            UserSelections.Append("10000");
+            UserSelections.SetRecommendations("10000", "Adventure", "America", "Home", "Lessons");
             Retract("Check10000");
+    }
+
+	rule Check10001 "All My Ex's Live In Texas" salience 10 {
+        when
+           UserSelections.IsSongThemeMatch("10001", "Adventure", "HeartBreak", "Rebellion")
+        then
+            UserSelections.SetRecommendations("10001", "Adventure", "HeartBreak", "Rebellion");
+            Retract("Check10001");
     }
     `
 
@@ -120,16 +143,8 @@ func main() {
 		panic(err)
 	}
 
-
-	fmt.Println("=======================================")
+	fmt.Println("\n==========")
 	fmt.Println("Song recommendations for user: ")
+	fmt.Println(userSelections.Recommendations)
 
-	if len(userSelections.Recommendations) > 0 {
-		for _, rec := range userSelections.Recommendations {
-			fmt.Println(rec)
-		}
-
-	} else {
-		fmt.Println("No songs matched the user's selections.")
-	}
 }
