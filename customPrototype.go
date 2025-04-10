@@ -97,7 +97,6 @@ func main() {
 	userSelections := &UserSelections{
 		Adventure:          true,
 		America:            true,
-		America:            true,
 		CarsTrucksTractors: false,
 		Goodtimes:          false,
 		Grit:               false,
